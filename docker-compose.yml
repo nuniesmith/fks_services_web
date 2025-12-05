@@ -1,0 +1,32 @@
+services:
+  fks-web:
+    build:
+      context: ../clients
+      dockerfile: ../services/web/docker/Dockerfile
+    image: nuniesmith/fks:web-latest
+    container_name: fks-web
+    ports:
+      - "3001:3001"
+      - "8000:8000"
+    environment:
+      - SERVICE_NAME=fks_web
+      - SERVICE_PORT=3001
+      - FKS_API_URL=http://fks-api:8001
+      - FKS_AUTH_URL=http://fks-auth:8009
+      - FKS_DATA_URL=http://fks-data:8003
+      - FKS_PORTFOLIO_URL=http://fks-portfolio:8012
+    volumes:
+      - ./dist:/usr/share/nginx/html
+    networks:
+      - fks-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  fks-network:
+    external: true
